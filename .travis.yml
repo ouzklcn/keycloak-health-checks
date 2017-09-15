@@ -1,0 +1,38 @@
+sudo: required
+
+dist: trusty
+
+group: edge
+
+language: java
+
+branches:
+  only:
+    - master
+    - /^(\d+\.)?(\d+\.)?\d+(-\w+)?$/
+
+install: true
+
+script:
+  -
+    if [ ! -z $TRAVIS_TAG ]; then
+      echo Setting release version $TRAVIS_TAG.;
+      mvn -q org.codehaus.mojo:versions-maven-plugin:2.2:set -DnewVersion=$TRAVIS_TAG;
+      echo Deploying release $TRAVIS_TAG.;
+      mvn -q package;
+    elif [ $TRAVIS_PULL_REQUEST = 'false' ] && [ $TRAVIS_BRANCH = 'master' ]; then
+      echo Deploying snapshot.;
+       mvn -q package;
+    else
+      echo Verifying snapshot.;
+      mvn -q clean package;
+    fi
+
+deploy:
+  provider: releases
+  skip_cleanup: true
+  api_key:
+    secure: IC9Gi+3jhYD7ehOANOTRSIhkd7nFX4pxUU4kxGc5sW6IcKVEOMakg7dM0ogZ41LnsTuONS/naHndsz9oAIpJ6KNu+0Y4nAfEI8GSK9R6JPkkev3ISjSxAGTUEUOEgLELB8466cOjSEmz79JCtviDQ3AdG1CNLdkUdHwzY6VfxAUEjvR3659+4avZ4f7GOJHV0QdER2QQsZOMxGYKoRspzfUEqQpEVH5Hcue+G69yo1NsVgz5zJw5bRjwPfD4zxqvBv3NJ5XozIjdGXNCHFg2quna8tpGkAtich4LEoCt7T5o5BX9pwPxQa2qhwwOarvJFzDjIfZR7nN6lArl6oTloSK0S7KGR4JRe6ngSd7QXN5cvOMzPIvULbOFdfhygRIGbqe7DqDyAipoP4Fz8ZIx78Nl+z3MFm+zvlqFpUKg/8nlTl/XQxR35Bhy+3VUG+AVsFRtRm3OQccPq5taM98ZTfRWrPE1Y7oq5AP579W+AqFnNAGJY4TvZgBmUEgYyfVkXicrxSACdYoXHVaIJ6Idvo/Fw336sJ5URElyr79VQGxpzLC/Kc2W2HqJjOYsLkhzaYAiVzyuytL79U4Y36vHMqLdItUYJkf0xnF+vvTtF696aBrWkx1gk8/MqvVEbQJnKQb5ccxpXElclnIjLzCkkjWdAi3Gs0Af1HTFbxVZJYY=
+  file: target/keycloak-health-checks-$TRAVIS_TAG.jar
+  on:
+    tags: true
