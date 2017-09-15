@@ -4,29 +4,36 @@ A collection of health checks for KeyCloak subsystems.
 
 ## Requirements
 
-* KeyCloak 2.5.5.Final (works also with Keycloak 3.0.0.Final)
+* KeyCloak 3.2.1.Final
 
 ## Build
 
 `mvn install`
 
 ## Installation
+You can make a manual build as described above and use the built jar or download the latest release from Releases page.
 
-After the extension has been built, install it as a JBoss/WildFly module via `jboss-cli`:
+To deploy you can use providers directory or install as a module and configure providers to use this module.
+### Using Providers Directory
+Put extension jar file to `$KEYCLOAK_HOME/providers/` directory. If directory doesn't exist, create it.
+
+### Using Modules
+#### Install
+After you get the extension install it as a JBoss/WildFly module via `jboss-cli`:
 
 ```
-[disconnected /] module add --name=de.tdlabs.keycloak.extensions.keycloak-health-checks --resources=/home/tom/dev/repos/gh/thomasdarimont/keycloak-dev/keycloak-health-checks/target/keycloak-health-checks-1.0.0-SNAPSHOT.jar --dependencies=org.keycloak.keycloak-core,org.keycloak.keycloak-services,org.keycloak.keycloak-server-spi,org.keycloak.keycloak-server-spi-private,javax.api,javax.ws.rs.api,com.fasterxml.jackson.core.jackson-core,com.fasterxml.jackson.core.jackson-databind,com.fasterxml.jackson.core.jackson-annotations
+[disconnected /] module add --name=de.tdlabs.keycloak.extensions.keycloak-health-checks --resources=/home/tom/dev/repos/gh/thomasdarimont/keycloak-dev/keycloak-health-checks/target/keycloak-health-checks-1.1.jar --dependencies=org.keycloak.keycloak-core,org.keycloak.keycloak-services,org.keycloak.keycloak-server-spi,org.keycloak.keycloak-server-spi-private,javax.api,javax.ws.rs.api,com.fasterxml.jackson.core.jackson-core,com.fasterxml.jackson.core.jackson-databind,com.fasterxml.jackson.core.jackson-annotations
 
 ```
 
-Alternatively, create `$KEYCLOAK_HOME/modules/de/tdlabs/keycloak/extensions/keycloak-health-checks/main/module.xml` to load extension from the local Maven repo:
+Alternatively, create `$KEYCLOAK_HOME/modules/system/layers/base/de/tdlabs/keycloak/extensions/keycloak-health-checks/main/` folder and put the extension jar in this folder. After that create a module.xml file as below in the same folder:
 
 ```xml
 <?xml version="1.0" ?>
-<module xmlns="urn:jboss:module:1.1" name="de.tdlabs.keycloak.extensions.keycloak-health-checks">
+<module xmlns="urn:jboss:module:1.3" name="de.tdlabs.keycloak.extensions.keycloak-health-checks">
 
     <resources>
-        <artifact name="de.tdlabs.keycloak:keycloak-health-checks:1.0.0-SNAPSHOT"/>        
+        <resource-root path="keycloak-health-checks-1.1.jar"/>      
     </resources>
 
     <dependencies>
@@ -43,7 +50,7 @@ Alternatively, create `$KEYCLOAK_HOME/modules/de/tdlabs/keycloak/extensions/keyc
 </module>
 ```
 
-## Configuration
+#### Configure
 
 Edit the wildfly `standalone.xml` or `standalone-ha.xml`
 `$KEYCLOAK_HOME/standalone/configuration/standalone.xml`:
@@ -65,6 +72,7 @@ Edit the wildfly `standalone.xml` or `standalone-ha.xml`
 ```
 /subsystem=keycloak-server:list-add(name=providers,value=module:de.tdlabs.keycloak.extensions.keycloak-health-checks)
 ```
+
 
 ## Running example
 
